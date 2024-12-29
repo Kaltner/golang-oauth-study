@@ -57,10 +57,8 @@ func (g *Github) Callback(code, state string) (string, error) {
 }
 
 func (g *Github) generateState() string {
-	fmt.Printf("%+v\n", g.stateList)
 	state := strings.ReplaceAll(uuid.NewString(), "-", "")
 	g.stateList[state] = true
-	fmt.Printf("%+v\n", g.stateList)
 	return state
 }
 
@@ -76,7 +74,6 @@ func (g *Github) buildAuthorizeURL(state string) (*url.URL, error) {
 	queryParams.Add("scope", scope)
 	queryParams.Add("state", state)
 
-	fmt.Printf("%+v\n", queryParams)
 	url, err := url.Parse(fmt.Sprintf("%s?%s", authorizeUrl, queryParams.Encode()))
 	if err != nil {
 		return nil, err
