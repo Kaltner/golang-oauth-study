@@ -18,8 +18,10 @@ This is a personal repo for me to study how to implement different Oauth2 flows 
 - Implement the Twitch Oauth2 flow.
 
 ### Work in progress
-- [] Twitch Oauth2 Implementation
+- [x] Twitch Oauth2 Implementation
 - [] GitHub unit tests
+- [] Error handling from Oauth Servers responses
+- [] Refresh token flow     
 
 ## Study material
 [Oauth Webside](https://www.oauth.com/)

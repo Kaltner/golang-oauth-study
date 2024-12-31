@@ -6,26 +6,36 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Kaltner/oauth_test/app/services/oauth"
+	"github.com/Kaltner/oauth_test/app/interactors"
 )
 
 type OauthHandler struct {
-	GithubService *oauth.Github
+	OauthInteractor interactors.OauthInteractor
 }
 
-func NewOauthHandler(githubService *oauth.Github) OauthHandler {
+func NewOauthHandler(oauthInteractor interactors.OauthInteractor) OauthHandler {
 	return OauthHandler{
-		GithubService: githubService,
+		OauthInteractor: oauthInteractor,
 	}
 }
 
 func (o OauthHandler) Authorize(w http.ResponseWriter, r *http.Request) {
-	authURL, err := o.GithubService.Authorize()
+	queryParams := r.URL.Query()
+	provider, err := o.checkAuthorizationRequestQueryParams(queryParams)
+	authURL, err := o.OauthInteractor.Authorize(provider)
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
 	http.Redirect(w, r, authURL, http.StatusFound)
+}
+
+func (o OauthHandler) checkAuthorizationRequestQueryParams(query url.Values) (string, error) {
+	provider, ok := query["provider"]
+	if !ok || len(provider) == 0 {
+		return "", errors.New("state query string is not set")
+	}
+	return provider[0], nil
 }
 
 func (o OauthHandler) Callback(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +47,7 @@ func (o OauthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := o.GithubService.Callback(code, state)
+	accessToken, err := o.OauthInteractor.Callback(code, state)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(401)
